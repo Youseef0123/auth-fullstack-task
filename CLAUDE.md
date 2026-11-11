@@ -10,7 +10,7 @@ auth-fullstack-task/
   backend/   NestJS 11, TypeScript strict, MongoDB via Mongoose
   frontend/  Next.js (latest stable, App Router, src/ dir), TypeScript strict,
              Zustand, Zod, react-hook-form, Tailwind CSS, axios
-  .github/workflows/ci.yml, docker-compose.yml, README.md, AI.md
+  .github/workflows/ci.yml, docker-compose.yml, README.md, AI.md, .gitattributes
 
 Backend layout: src/common/{constants,decorators,filters,guards}, src/config,
 src/modules/{auth,users,health} — each module has its own dto/, and users has schemas/.

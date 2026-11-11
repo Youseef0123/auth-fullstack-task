@@ -5,11 +5,12 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { EnvironmentVariables } from './environment-variables';
+import { setupSwagger } from './swagger.config';
 import { parseTrustProxy } from './trust-proxy';
 
 /**
- * Everything that shapes request handling. Used by main.ts and the e2e test
- * app factory so production and tests cannot drift apart.
+ * Everything that shapes the HTTP surface (request pipeline and API docs).
+ * Used by main.ts and the e2e test app factory so they cannot drift apart.
  */
 export function configureApp(app: NestExpressApplication): void {
   app.useLogger(app.get(Logger));
@@ -35,4 +36,5 @@ export function configureApp(app: NestExpressApplication): void {
       transform: true,
     }),
   );
+  setupSwagger(app);
 }

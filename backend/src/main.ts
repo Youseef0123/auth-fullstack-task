@@ -5,7 +5,7 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { configureApp } from './config/configure-app';
 import { EnvironmentVariables } from './config/environment-variables';
-import { SWAGGER_PATH, setupSwagger } from './config/swagger.config';
+import { SWAGGER_PATH } from './config/swagger.config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -13,7 +13,6 @@ async function bootstrap(): Promise<void> {
   });
   configureApp(app);
   app.enableShutdownHooks();
-  setupSwagger(app);
 
   const config: ConfigService<EnvironmentVariables, true> =
     app.get(ConfigService);

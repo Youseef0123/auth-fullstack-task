@@ -7,12 +7,15 @@ import type {
 } from '@/features/auth/types/auth.types';
 import { ApiError } from '@/lib/api-error';
 
+/** The only profile fields kept client-side (CLAUDE.md): no token, no timestamps. */
+export type SessionUser = Pick<User, 'id' | 'email' | 'name'>;
+
 export type AuthStatus =
   'idle' | 'loading' | 'authenticated' | 'unauthenticated';
 
 /** Only non-sensitive profile data and the status; the token stays in an httpOnly cookie. */
 export interface AuthState {
-  user: User | null;
+  user: SessionUser | null;
   status: AuthStatus;
   /** Resolves the session; rejects only when the result is unknown (network/server error). */
   fetchMe: () => Promise<void>;
@@ -20,6 +23,12 @@ export interface AuthState {
   signUp: (payload: SignUpRequest) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+const toSessionUser = ({ id, email, name }: User): SessionUser => ({
+  id,
+  email,
+  name,
+});
 
 /**
  * Module-level store: every write happens in the browser (effects and event
@@ -36,7 +45,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ status: 'loading' });
     try {
       const user = await authService.getMe();
-      set({ user, status: 'authenticated' });
+      set({ user: toSessionUser(user), status: 'authenticated' });
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 401) {
         // The cookie passed the proxy's presence check but is invalid or expired.
@@ -52,12 +61,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   signIn: async (payload) => {
     const user = await authService.signIn(payload);
-    set({ user, status: 'authenticated' });
+    set({ user: toSessionUser(user), status: 'authenticated' });
   },
 
   signUp: async (payload) => {
     const user = await authService.signUp(payload);
-    set({ user, status: 'authenticated' });
+    set({ user: toSessionUser(user), status: 'authenticated' });
   },
 
   logout: async () => {
@@ -66,7 +75,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 }));
 
-export const selectUser = (state: AuthState): User | null => state.user;
+export const selectUser = (state: AuthState): SessionUser | null => state.user;
 export const selectStatus = (state: AuthState): AuthStatus => state.status;
 export const selectFetchMe = (state: AuthState): AuthState['fetchMe'] =>
   state.fetchMe;

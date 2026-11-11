@@ -10,7 +10,13 @@ auth-fullstack-task/
   backend/   NestJS 11, TypeScript strict, MongoDB via Mongoose
   frontend/  Next.js (latest stable, App Router, src/ dir), TypeScript strict,
              Zustand, Zod, react-hook-form, Tailwind CSS, axios
-  .github/workflows/ci.yml, docker-compose.yml, README.md, AI.md, .gitattributes
+             tests: Vitest, Testing Library (react, dom, user-event, jest-dom), MSW, jsdom
+  nginx/     edge proxy config (nginx.conf) for docker-compose
+  .github/workflows/ci.yml, docker-compose.yml, .env.example (compose secrets),
+  README.md, AI.md, .gitattributes, .nvmrc
+
+Runtime: Node 22 LTS for Docker images and CI (.nvmrc = 22). package.json engines
+stay ">=20.19.0" so local development on Node 20 still works.
 
 Backend layout: src/common/{constants,decorators,filters,guards}, src/config,
 src/modules/{auth,users,health} — each module has its own dto/, and users has schemas/.
@@ -18,6 +24,9 @@ Backend tests: unit specs next to the code (*.spec.ts); e2e in backend/test/
 (*.e2e-spec.ts, jest-e2e.json) with shared helpers in backend/test/utils/.
 Frontend layout: src/app (route groups (auth) and (protected)), src/components/ui,
 src/features/auth/{components,schemas,services,store,types}, src/lib.
+Frontend tests: *.test.ts(x) next to the code they test; vitest.config.mts and
+vitest.setup.ts at frontend/ root.
+Each app has its own Dockerfile and .dockerignore.
 
 ## Naming
 - Files: kebab-case (sign-up-form.tsx, auth.service.ts). React components: PascalCase exports.

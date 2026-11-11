@@ -5,4 +5,5 @@ export const JWT_ALGORITHM = 'HS256';
 export const AUTH_MESSAGES = {
   invalidCredentials: 'Invalid email or password',
   emailTaken: 'Email already registered',
+  tooManyRequests: 'Too many requests, please try again later',
 } as const;

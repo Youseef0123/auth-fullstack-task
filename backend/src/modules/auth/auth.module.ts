@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JWT_ALGORITHM } from '../../common/constants/auth.constants';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
+import {
+  AUTH_MESSAGES,
+  JWT_ALGORITHM,
+} from '../../common/constants/auth.constants';
 import { durationToSeconds } from '../../config/duration';
 import { EnvironmentVariables } from '../../config/environment-variables';
 import { UsersModule } from '../users/users.module';
@@ -27,6 +31,20 @@ import { JwtStrategy } from './jwt.strategy';
             config.get('JWT_EXPIRES_IN', { infer: true }),
           ),
         },
+      }),
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (
+        config: ConfigService<EnvironmentVariables, true>,
+      ): ThrottlerModuleOptions => ({
+        throttlers: [
+          {
+            ttl: config.get('THROTTLE_TTL_MS', { infer: true }),
+            limit: config.get('THROTTLE_LIMIT', { infer: true }),
+          },
+        ],
+        errorMessage: AUTH_MESSAGES.tooManyRequests,
       }),
     }),
   ],

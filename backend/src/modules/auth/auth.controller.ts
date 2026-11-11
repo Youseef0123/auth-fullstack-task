@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -14,8 +15,10 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { ACCESS_TOKEN_COOKIE } from '../../common/constants/auth.constants';
 import { ErrorResponseDto } from '../../common/filters/error-response.dto';
@@ -41,6 +44,7 @@ export class AuthController {
   ) {}
 
   @Post('signup')
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Create an account and start a session' })
   @ApiCreatedResponse({ type: UserResponseDto, headers: SET_COOKIE_HEADER })
   @ApiBadRequestResponse({
@@ -50,6 +54,10 @@ export class AuthController {
   @ApiConflictResponse({
     type: ErrorResponseDto,
     description: 'Email already registered',
+  })
+  @ApiTooManyRequestsResponse({
+    type: ErrorResponseDto,
+    description: 'Too many sign up attempts',
   })
   async signUp(
     @Body() dto: SignUpDto,
@@ -62,6 +70,7 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
   @ApiOperation({ summary: 'Sign in and start a session' })
   @ApiOkResponse({ type: UserResponseDto, headers: SET_COOKIE_HEADER })
   @ApiBadRequestResponse({
@@ -71,6 +80,10 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     type: ErrorResponseDto,
     description: 'Invalid email or password',
+  })
+  @ApiTooManyRequestsResponse({
+    type: ErrorResponseDto,
+    description: 'Too many sign in attempts',
   })
   async signIn(
     @Body() dto: SignInDto,

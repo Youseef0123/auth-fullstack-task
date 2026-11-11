@@ -26,7 +26,21 @@ describe('envValidationSchema', () => {
       NODE_ENV: 'development',
       PORT: 4000,
       JWT_EXPIRES_IN: '1d',
+      THROTTLE_TTL_MS: 60_000,
+      THROTTLE_LIMIT: 5,
     });
+  });
+
+  it('accepts overridden throttle limits', () => {
+    expect(
+      parse({ ...validEnv, THROTTLE_TTL_MS: '1000', THROTTLE_LIMIT: '100' }),
+    ).toMatchObject({ THROTTLE_TTL_MS: 1000, THROTTLE_LIMIT: 100 });
+  });
+
+  it('rejects a non-positive THROTTLE_LIMIT', () => {
+    expect(validationError({ ...validEnv, THROTTLE_LIMIT: '0' })).toBe(
+      '"THROTTLE_LIMIT" must be a positive number',
+    );
   });
 
   it('coerces PORT to a number', () => {

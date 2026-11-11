@@ -30,4 +30,6 @@ export const envValidationSchema = Joi.object<EnvironmentVariables, true>({
   CORS_ORIGIN: Joi.string()
     .uri({ scheme: ['http', 'https'] })
     .required(),
+  THROTTLE_TTL_MS: Joi.number().integer().positive().default(60_000),
+  THROTTLE_LIMIT: Joi.number().integer().positive().default(5),
 });

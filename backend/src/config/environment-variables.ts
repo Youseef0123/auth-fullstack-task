@@ -9,4 +9,6 @@ export interface EnvironmentVariables {
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
   CORS_ORIGIN: string;
+  THROTTLE_TTL_MS: number;
+  THROTTLE_LIMIT: number;
 }

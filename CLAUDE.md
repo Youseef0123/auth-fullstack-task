@@ -14,6 +14,8 @@ auth-fullstack-task/
 
 Backend layout: src/common/{constants,decorators,filters,guards}, src/config,
 src/modules/{auth,users,health} — each module has its own dto/, and users has schemas/.
+Backend tests: unit specs next to the code (*.spec.ts); e2e in backend/test/
+(*.e2e-spec.ts, jest-e2e.json) with shared helpers in backend/test/utils/.
 Frontend layout: src/app (route groups (auth) and (protected)), src/components/ui,
 src/features/auth/{components,schemas,services,store,types}, src/lib.
 

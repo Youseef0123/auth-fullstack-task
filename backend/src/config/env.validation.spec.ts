@@ -53,8 +53,8 @@ describe('envValidationSchema', () => {
     );
   });
 
-  it('rejects a JWT_EXPIRES_IN without a time unit', () => {
-    expect(validationError({ ...validEnv, JWT_EXPIRES_IN: '3600' })).toContain(
+  it.each(['3600', '0s', '1w', '-5m'])('rejects JWT_EXPIRES_IN %p', (value) => {
+    expect(validationError({ ...validEnv, JWT_EXPIRES_IN: value })).toContain(
       '"JWT_EXPIRES_IN" must be a duration',
     );
   });

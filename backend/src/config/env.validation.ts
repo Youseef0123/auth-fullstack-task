@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { DURATION_PATTERN } from './duration';
 import {
   EnvironmentVariables,
   NODE_ENVIRONMENTS,
@@ -20,7 +21,7 @@ export const envValidationSchema = Joi.object<EnvironmentVariables, true>({
     }),
   JWT_SECRET: Joi.string().min(JWT_SECRET_MIN_LENGTH).required(),
   JWT_EXPIRES_IN: Joi.string()
-    .pattern(/^\d+[smhd]$/)
+    .pattern(DURATION_PATTERN)
     .default('1d')
     .messages({
       'string.pattern.base':

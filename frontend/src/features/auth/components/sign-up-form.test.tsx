@@ -172,4 +172,40 @@ describe('SignUpForm', () => {
     expect(form.submit).toBeEnabled();
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it('puts backend 400 validation messages on the matching fields', async () => {
+    server.use(
+      mock.post('*/api/auth/signup', () =>
+        HttpResponse.json(
+          {
+            statusCode: 400,
+            message: [
+              'Name must be between 3 and 50 characters',
+              'Password must contain at least one special character',
+            ],
+            error: 'Bad Request',
+            path: '/api/auth/signup',
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400 },
+        ),
+      ),
+    );
+    const form = renderForm();
+    await fillValidForm(form);
+
+    await form.user.click(form.submit);
+
+    await waitFor(() =>
+      expect(form.name).toHaveAccessibleDescription(
+        'Name must be between 3 and 50 characters',
+      ),
+    );
+    expect(form.name).toHaveFocus();
+    expect(form.password).toHaveAttribute('aria-invalid', 'true');
+    expect(
+      screen.getByText('Password must contain at least one special character'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });

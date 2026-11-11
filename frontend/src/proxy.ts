@@ -10,10 +10,13 @@ const GUEST_ONLY_PATHS: readonly string[] = [ROUTES.signIn, ROUTES.signUp];
  * layout calls /api/users/me and handles a rejected cookie.
  */
 export function proxy(request: NextRequest): NextResponse {
+  const { pathname } = request.nextUrl;
   const hasSession = Boolean(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value);
-  const isGuestOnly = GUEST_ONLY_PATHS.includes(request.nextUrl.pathname);
+  const isProtected =
+    pathname === ROUTES.home || pathname.startsWith(`${ROUTES.home}/`);
+  const isGuestOnly = GUEST_ONLY_PATHS.includes(pathname);
 
-  if (!hasSession && !isGuestOnly) {
+  if (!hasSession && isProtected) {
     return NextResponse.redirect(new URL(ROUTES.signIn, request.url));
   }
   if (hasSession && isGuestOnly) {

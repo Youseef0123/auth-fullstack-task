@@ -8,6 +8,7 @@ import { envValidationSchema } from './config/env.validation';
 import { EnvironmentVariables } from './config/environment-variables';
 import { createLoggerConfig } from './config/logger.config';
 import { HealthModule } from './modules/health/health.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HealthModule } from './modules/health/health.module';
       }),
     }),
     HealthModule,
+    UsersModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

@@ -1,0 +1,24 @@
+{
+  "rootDir": "..",
+  "roots": [
+    "<rootDir>/src",
+    "<rootDir>/test"
+  ],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "testTimeout": 30000,
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/**/*.spec.ts",
+    "!src/main.ts"
+  ],
+  "coverageDirectory": "coverage/e2e"
+}

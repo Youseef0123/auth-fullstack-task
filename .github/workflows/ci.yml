@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (lint, typecheck, unit, e2e, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # mongodb-memory-server downloads MongoDB on install; keep it in a cached path.
+      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Cache MongoDB binaries
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.MONGOMS_DOWNLOAD_DIR }}
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:e2e
+      - run: npm run build
+
+  frontend:
+    name: Frontend (lint, typecheck, format, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      # Read by next.config.ts when the /api rewrite is built (typegen and build).
+      BACKEND_URL: http://localhost:4000
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    name: Docker compose smoke test
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Generate a throwaway JWT secret
+        run: echo "JWT_SECRET=$(openssl rand -hex 48)" > .env
+      - run: docker compose build
+      - name: Start the stack and wait until every service is healthy
+        run: docker compose up -d --wait --wait-timeout 180
+      - name: Smoke test through nginx (port 8080)
+        run: |
+          set -euo pipefail
+          curl -fsS http://localhost:8080/api/health
+          email="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}@example.com"
+          curl -fsS -c cookies.txt -H 'Content-Type: application/json' \
+            -d "{\"name\":\"CI User\",\"email\":\"${email}\",\"password\":\"Ci-smoke-1!\"}" \
+            http://localhost:8080/api/auth/signup
+          curl -fsS -b cookies.txt http://localhost:8080/api/users/me | grep -q "\"email\":\"${email}\""
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v

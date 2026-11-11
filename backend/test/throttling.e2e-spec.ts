@@ -114,7 +114,7 @@ describe('Rate limiting & trust proxy (e2e)', () => {
     });
   });
 
-  describe('TRUST_PROXY=loopback (trusted local proxy, e.g. Next.js)', () => {
+  describe('TRUST_PROXY=loopback (a local proxy that sets X-Forwarded-For)', () => {
     useFreshApp({ TRUST_PROXY: 'loopback' });
 
     it('gives each forwarded client its own bucket', async () => {
@@ -140,6 +140,16 @@ describe('Rate limiting & trust proxy (e2e)', () => {
 
       await signIn(CLIENT_B).expect(429);
       await signIn().expect(429);
+    });
+
+    it('still answers 429 when every request rotates X-Forwarded-For', async () => {
+      const rotatingClient = (attempt: number): string =>
+        `203.0.113.${attempt}`;
+      for (let attempt = 1; attempt <= LIMIT; attempt += 1) {
+        await signIn(rotatingClient(attempt)).expect(401);
+      }
+
+      await signIn(rotatingClient(LIMIT + 1)).expect(429);
     });
   });
 });

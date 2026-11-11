@@ -11,4 +11,5 @@ export interface EnvironmentVariables {
   CORS_ORIGIN: string;
   THROTTLE_TTL_MS: number;
   THROTTLE_LIMIT: number;
+  TRUST_PROXY: string;
 }

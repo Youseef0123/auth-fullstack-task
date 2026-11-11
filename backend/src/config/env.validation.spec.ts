@@ -28,8 +28,27 @@ describe('envValidationSchema', () => {
       JWT_EXPIRES_IN: '1d',
       THROTTLE_TTL_MS: 60_000,
       THROTTLE_LIMIT: 5,
+      TRUST_PROXY: 'loopback',
     });
   });
+
+  it.each(['false', '1', ' 10.0.0.0/8, loopback '])(
+    'accepts TRUST_PROXY %p',
+    (value) => {
+      expect(parse({ ...validEnv, TRUST_PROXY: value }).TRUST_PROXY).toBe(
+        value.trim(),
+      );
+    },
+  );
+
+  it.each(['true', 'localhost', '10.0.0.0/33'])(
+    'rejects TRUST_PROXY %p',
+    (value) => {
+      expect(validationError({ ...validEnv, TRUST_PROXY: value })).toContain(
+        '"TRUST_PROXY" must be "false", "loopback", a hop count',
+      );
+    },
+  );
 
   it('accepts overridden throttle limits', () => {
     expect(

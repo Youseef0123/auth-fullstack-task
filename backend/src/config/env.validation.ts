@@ -4,6 +4,7 @@ import {
   EnvironmentVariables,
   NODE_ENVIRONMENTS,
 } from './environment-variables';
+import { isValidTrustProxy } from './trust-proxy';
 
 export const JWT_SECRET_MIN_LENGTH = 32;
 
@@ -32,4 +33,14 @@ export const envValidationSchema = Joi.object<EnvironmentVariables, true>({
     .required(),
   THROTTLE_TTL_MS: Joi.number().integer().positive().default(60_000),
   THROTTLE_LIMIT: Joi.number().integer().positive().default(5),
+  TRUST_PROXY: Joi.string()
+    .trim()
+    .default('loopback')
+    .custom((value: string, helpers) =>
+      isValidTrustProxy(value) ? value : helpers.error('any.invalid'),
+    )
+    .messages({
+      'any.invalid':
+        '"TRUST_PROXY" must be "false", "loopback", a hop count (e.g. 1) or a comma-separated list of IPs/CIDRs',
+    }),
 });

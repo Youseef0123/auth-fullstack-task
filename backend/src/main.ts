@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { EnvironmentVariables } from './config/environment-variables';
+import { SWAGGER_PATH, setupSwagger } from './config/swagger.config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -30,10 +31,14 @@ async function bootstrap(): Promise<void> {
     }),
   );
   app.enableShutdownHooks();
+  setupSwagger(app);
 
   const port = config.get('PORT', { infer: true });
   await app.listen(port);
-  logger.log(`API listening on port ${port}`, 'Bootstrap');
+  logger.log(
+    `API listening on port ${port}, docs at /${SWAGGER_PATH}`,
+    'Bootstrap',
+  );
 }
 
 void bootstrap();

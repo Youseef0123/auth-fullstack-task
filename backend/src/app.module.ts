@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { envValidationSchema } from './config/env.validation';
 import { EnvironmentVariables } from './config/environment-variables';
 import { createLoggerConfig } from './config/logger.config';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { createLoggerConfig } from './config/logger.config';
         serverSelectionTimeoutMS: 5000,
       }),
     }),
+    HealthModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

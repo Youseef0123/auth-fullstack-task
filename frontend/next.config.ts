@@ -31,6 +31,8 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Stops `next dev` from writing an AGENTS.md outside the documented layout.
+  agentRules: false,
   turbopack: {
     rules: {
       '*.css': {

@@ -1,0 +1,15 @@
+node_modules
+.next
+coverage
+docs
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
+# Tests are not part of the image; the drift guard also imports from ../backend,
+# which is outside this build context.
+**/*.test.ts
+**/*.test.tsx
+vitest.config.mts
+vitest.setup.ts

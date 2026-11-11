@@ -30,6 +30,8 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server for the Docker image (node .next/standalone/server.js).
+  output: 'standalone',
   poweredByHeader: false,
   // Stops `next dev` from writing an AGENTS.md outside the documented layout.
   agentRules: false,

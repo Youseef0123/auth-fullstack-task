@@ -28,8 +28,11 @@ describe('envValidationSchema', () => {
       JWT_EXPIRES_IN: '1d',
       THROTTLE_TTL_MS: 60_000,
       THROTTLE_LIMIT: 5,
-      TRUST_PROXY: 'loopback',
     });
+  });
+
+  it('trusts no proxy when TRUST_PROXY is unset', () => {
+    expect(parse(validEnv).TRUST_PROXY).toBe('false');
   });
 
   it.each(['false', '1', ' 10.0.0.0/8, loopback '])(

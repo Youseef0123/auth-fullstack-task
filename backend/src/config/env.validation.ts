@@ -33,9 +33,10 @@ export const envValidationSchema = Joi.object<EnvironmentVariables, true>({
     .required(),
   THROTTLE_TTL_MS: Joi.number().integer().positive().default(60_000),
   THROTTLE_LIMIT: Joi.number().integer().positive().default(5),
+  // Unset means "trust no proxy": X-Forwarded-For is ignored unless explicitly enabled.
   TRUST_PROXY: Joi.string()
     .trim()
-    .default('loopback')
+    .default('false')
     .custom((value: string, helpers) =>
       isValidTrustProxy(value) ? value : helpers.error('any.invalid'),
     )

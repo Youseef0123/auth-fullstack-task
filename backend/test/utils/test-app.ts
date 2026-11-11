@@ -18,7 +18,7 @@ export const BASE_TEST_ENV: Omit<TestEnv, 'MONGODB_URI'> = {
   CORS_ORIGIN: 'http://localhost:3000',
   THROTTLE_TTL_MS: '60000',
   THROTTLE_LIMIT: '10000',
-  TRUST_PROXY: 'loopback',
+  TRUST_PROXY: 'false',
 };
 
 export interface TestApp {

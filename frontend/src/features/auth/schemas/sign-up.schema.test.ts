@@ -70,6 +70,20 @@ describe('signUpSchema', () => {
       expect(messagesFor('name', 'x'.repeat(50))).toEqual([]);
     });
 
+    // Counted in characters like the backend DTO (backend e2e has the same cases).
+    it.each([
+      ['45 letters + 3 emoji', `${'x'.repeat(45)}${'🎉'.repeat(3)}`],
+      ['26 emoji', '😀'.repeat(26)],
+    ])('accepts a name of %s', (_case, name) => {
+      expect(messagesFor('name', name)).toEqual([]);
+    });
+
+    it('rejects 51 emoji', () => {
+      expect(messagesFor('name', '😀'.repeat(51))).toEqual([
+        NAME_MESSAGES.length,
+      ]);
+    });
+
     it('trims the name', () => {
       expect(signUpSchema.parse({ ...VALID, name: '  Jane Doe  ' }).name).toBe(
         'Jane Doe',

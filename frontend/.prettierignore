@@ -1,3 +1,9 @@
+# Generated output (Prettier only reads the .gitignore next to it, not the root one)
+.next/
+out/
+build/
+coverage/
+
 package-lock.json
 next-env.d.ts
 docs/screenshots/

@@ -24,6 +24,8 @@ Backend tests: unit specs next to the code (*.spec.ts); e2e in backend/test/
 (*.e2e-spec.ts, jest-e2e.json) with shared helpers in backend/test/utils/.
 Frontend layout: src/app (route groups (auth) and (protected)), src/components/ui,
 src/features/auth/{components,schemas,services,store,types}, src/lib.
+Components used by a single route live next to it in a private _components/ folder
+(e.g. src/app/(protected)/app/_components/).
 Frontend tests: *.test.ts(x) next to the code they test; vitest.config.mts and
 vitest.setup.ts at frontend/ root. src/lib must not import from src/features or
 src/app (enforced by ESLint).

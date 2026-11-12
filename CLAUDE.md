@@ -31,6 +31,7 @@ vitest.setup.ts at frontend/ root. src/lib must not import from src/features or
 src/app (enforced by ESLint).
 Each app has its own Dockerfile, .dockerignore and .env.example (backend/.env,
 frontend/.env.local are git-ignored). README screenshots: frontend/docs/screenshots/.
+Static images served by the frontend live in frontend/public/images/.
 
 ## Naming
 - Files: kebab-case (sign-up-form.tsx, auth.service.ts). React components: PascalCase exports.

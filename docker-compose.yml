@@ -4,7 +4,9 @@ name: auth-fullstack-task
 
 services:
   mongo:
-    image: mongo:8.0
+    # 8.2: mongo:8.0 (8.0.34) and 9.0 refuse to start on Linux >= 6.19 (SERVER-121912),
+    # e.g. on current GitHub runners; 8.2.12 ships the fixed tcmalloc.
+    image: mongo:8.2
     restart: unless-stopped
     user: "999:999"
     volumes:

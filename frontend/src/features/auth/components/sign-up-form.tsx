@@ -9,6 +9,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { PasswordChecklist } from '@/features/auth/components/password-checklist';
 import { PasswordInput } from '@/features/auth/components/password-input';
+import { authFieldForMessage } from '@/features/auth/schemas/field-messages';
 import {
   signUpSchema,
   type SignUpFormValues,
@@ -41,6 +42,7 @@ export function SignUpForm() {
     } catch (error) {
       applyApiError(error, setError, {
         fields: ['name', 'email', 'password'],
+        fieldForMessage: authFieldForMessage,
         fieldByStatus: { 409: 'email' },
       });
     }

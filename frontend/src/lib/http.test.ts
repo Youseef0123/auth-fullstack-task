@@ -55,67 +55,32 @@ describe('http client', () => {
   });
 
   describe('error normalization', () => {
-    it('maps a 400 message array onto fields by known message', async () => {
-      server.use(
-        mock.post('*/api/test', () =>
-          backendError(400, [
-            'Please enter a valid email address',
-            'Name must be between 3 and 50 characters',
-            'Password must contain at least one number',
-          ]),
-        ),
-      );
+    it('keeps a 400 message array raw and in order', async () => {
+      const messages = [
+        'property role should not exist',
+        'Password is required',
+        'Name must be between 3 and 50 characters',
+      ];
+      server.use(mock.post('*/api/test', () => backendError(400, messages)));
 
       const error = await failingRequest();
 
       expect(error.statusCode).toBe(400);
-      expect(error.fieldErrors).toEqual({
-        email: 'Please enter a valid email address',
-        name: 'Name must be between 3 and 50 characters',
-        password: 'Password must contain at least one number',
-      });
-    });
-
-    it('keeps the first message per field and surfaces unknown messages', async () => {
-      server.use(
-        mock.post('*/api/test', () =>
-          backendError(400, [
-            'property role should not exist',
-            'Password is required',
-            'Password must be at least 8 characters',
-          ]),
-        ),
-      );
-
-      const error = await failingRequest();
-
-      expect(error.fieldErrors).toEqual({ password: 'Password is required' });
-      expect(error.message).toBe('property role should not exist');
-    });
-
-    it('has no fieldErrors when no message matches a field', async () => {
-      server.use(
-        mock.post('*/api/test', () =>
-          backendError(400, 'property role should not exist'),
-        ),
-      );
-
-      const error = await failingRequest();
-
-      expect(error.fieldErrors).toBeUndefined();
+      expect(error.messages).toEqual(messages);
       expect(error.message).toBe('property role should not exist');
     });
 
     it.each([
+      [400, 'property role should not exist'],
       [401, 'Invalid email or password'],
       [409, 'Email already registered'],
-    ])('passes a %i message through', async (status, message) => {
+    ])('passes a single %i message through', async (status, message) => {
       server.use(mock.post('*/api/test', () => backendError(status, message)));
 
       const error = await failingRequest();
 
       expect(error).toMatchObject({ statusCode: status, message });
-      expect(error.fieldErrors).toBeUndefined();
+      expect(error.messages).toEqual([message]);
     });
 
     it('replaces the 429 message with user-facing copy', async () => {
@@ -130,6 +95,7 @@ describe('http client', () => {
       expect(error).toMatchObject({
         statusCode: 429,
         message: 'Too many attempts, please try again later',
+        messages: ['Too many requests, please try again later'],
       });
     });
 
@@ -141,6 +107,7 @@ describe('http client', () => {
       expect(error).toMatchObject({
         statusCode: 0,
         message: NETWORK_ERROR_MESSAGE,
+        messages: [],
       });
     });
 

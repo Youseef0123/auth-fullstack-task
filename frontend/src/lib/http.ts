@@ -1,5 +1,4 @@
 import axios, { isAxiosError } from 'axios';
-import { FIELD_MESSAGES } from '@/features/auth/schemas/field-messages';
 import {
   ApiError,
   type BackendErrorBody,
@@ -9,12 +8,6 @@ import {
 const NETWORK_ERROR_MESSAGE =
   'Unable to reach the server. Check your connection and try again.';
 const TOO_MANY_REQUESTS_MESSAGE = 'Too many attempts, please try again later';
-
-const FIELD_BY_MESSAGE = new Map(
-  Object.entries(FIELD_MESSAGES).flatMap(([field, messages]) =>
-    messages.map((message) => [message, field] as const),
-  ),
-);
 
 function isBackendErrorBody(data: unknown): data is BackendErrorBody {
   if (typeof data !== 'object' || data === null || !('message' in data)) {
@@ -36,32 +29,21 @@ function toApiError(error: unknown): ApiError {
   if (!response) {
     return new ApiError(0, NETWORK_ERROR_MESSAGE);
   }
-  if (response.status === 429) {
-    return new ApiError(429, TOO_MANY_REQUESTS_MESSAGE);
-  }
   // A body that isn't ours means something in between (the Next proxy) failed.
   if (!isBackendErrorBody(response.data)) {
     return new ApiError(response.status, NETWORK_ERROR_MESSAGE);
   }
+  const messages = [response.data.message].flat();
+  if (response.status === 429) {
+    return new ApiError(429, TOO_MANY_REQUESTS_MESSAGE, messages);
+  }
   if (response.status >= 500) {
     return new ApiError(response.status, UNEXPECTED_ERROR_MESSAGE);
   }
-
-  const messages = [response.data.message].flat();
-  const fieldErrors: Record<string, string> = {};
-  const otherMessages: string[] = [];
-  for (const message of messages) {
-    const field = FIELD_BY_MESSAGE.get(message);
-    if (field) {
-      fieldErrors[field] ??= message;
-    } else {
-      otherMessages.push(message);
-    }
-  }
   return new ApiError(
     response.status,
-    otherMessages[0] ?? messages[0] ?? UNEXPECTED_ERROR_MESSAGE,
-    Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
+    messages[0] ?? UNEXPECTED_ERROR_MESSAGE,
+    messages,
   );
 }
 

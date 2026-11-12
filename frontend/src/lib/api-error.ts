@@ -7,25 +7,27 @@ export interface BackendErrorBody {
   timestamp: string;
 }
 
-/** Field name -> first backend message for that field. */
-export type FieldErrors = Readonly<Partial<Record<string, string>>>;
-
 export const UNEXPECTED_ERROR_MESSAGE =
   'Something went wrong. Please try again.';
 
 /**
  * Every failed request through `http` rejects with this error.
- * statusCode is 0 when the server could not be reached.
+ * statusCode is 0 when the server could not be reached; `message` is safe to
+ * show to users, `messages` are the backend's raw messages (empty when none).
  */
 export class ApiError extends Error {
   readonly statusCode: number;
-  readonly fieldErrors?: FieldErrors;
+  readonly messages: readonly string[];
 
-  constructor(statusCode: number, message: string, fieldErrors?: FieldErrors) {
+  constructor(
+    statusCode: number,
+    message: string,
+    messages: readonly string[] = [],
+  ) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
-    this.fieldErrors = fieldErrors;
+    this.messages = messages;
   }
 
   static from(error: unknown): ApiError {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/features/auth/components/password-input';
+import { authFieldForMessage } from '@/features/auth/schemas/field-messages';
 import {
   signInSchema,
   type SignInFormValues,
@@ -36,7 +37,10 @@ export function SignInForm() {
       await signIn(values);
       router.replace(ROUTES.home);
     } catch (error) {
-      applyApiError(error, setError, { fields: ['email', 'password'] });
+      applyApiError(error, setError, {
+        fields: ['email', 'password'],
+        fieldForMessage: authFieldForMessage,
+      });
     }
   });
 

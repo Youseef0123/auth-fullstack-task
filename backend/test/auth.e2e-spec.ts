@@ -254,6 +254,17 @@ describe('Auth (e2e)', () => {
       expect(cookie?.attributes.has('secure')).toBe(false);
     });
 
+    it('carries a JWT whose payload holds only the user id', async () => {
+      const response = await signUp().expect(201);
+      const token = getSetCookie(response, 'access_token')?.value ?? '';
+      const payload = JSON.parse(
+        Buffer.from(token.split('.')[1], 'base64url').toString('utf8'),
+      ) as Record<string, unknown>;
+
+      expect(Object.keys(payload).sort()).toEqual(['exp', 'iat', 'sub']);
+      expect(payload.sub).toBe((response.body as UserResponseDto).id);
+    });
+
     it('is cleared on logout with the same attributes', async () => {
       const set = getSetCookie(await signUp().expect(201), 'access_token');
       const cleared = getSetCookie(

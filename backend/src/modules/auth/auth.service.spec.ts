@@ -66,10 +66,7 @@ describe('AuthService', () => {
       expect(findByEmail).toHaveBeenCalledWith(user.email, {
         includePassword: true,
       });
-      expect(signAsync).toHaveBeenCalledWith({
-        sub: user._id.toString(),
-        email: user.email,
-      });
+      expect(signAsync).toHaveBeenCalledWith({ sub: user._id.toString() });
       expect(result).toEqual({
         accessToken: 'signed.jwt',
         user: {

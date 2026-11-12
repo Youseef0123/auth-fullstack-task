@@ -57,7 +57,7 @@ export class AuthService implements OnModuleInit {
   }
 
   private async buildAuthResult(user: UserDocument): Promise<AuthResult> {
-    const payload: JwtPayload = { sub: user._id.toString(), email: user.email };
+    const payload: JwtPayload = { sub: user._id.toString() };
     return {
       user: UserResponseDto.fromUser(user),
       accessToken: await this.jwtService.signAsync(payload),

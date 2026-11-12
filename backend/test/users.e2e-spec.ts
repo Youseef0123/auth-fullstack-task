@@ -92,24 +92,20 @@ describe('GET /api/users/me (e2e)', () => {
   it('401 with an unsigned (alg=none) token', async () => {
     const forged = `${base64Url({ alg: 'none', typ: 'JWT' })}.${base64Url({
       sub: user.id,
-      email: user.email,
     })}.`;
     await expectUnauthorized(forged);
   });
 
   it('401 with a token signed by another secret', async () => {
     const foreign = testApp.jwt.sign(
-      { sub: user.id, email: user.email },
+      { sub: user.id },
       { secret: 'another-secret-that-is-at-least-32-characters' },
     );
     await expectUnauthorized(foreign);
   });
 
   it('401 with an expired token', async () => {
-    const expired = testApp.jwt.sign(
-      { sub: user.id, email: user.email },
-      { expiresIn: -60 },
-    );
+    const expired = testApp.jwt.sign({ sub: user.id }, { expiresIn: -60 });
     await expectUnauthorized(expired);
   });
 

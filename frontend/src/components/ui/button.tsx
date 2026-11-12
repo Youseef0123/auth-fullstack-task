@@ -5,11 +5,11 @@ import { cn } from '@/lib/cn';
 type ButtonVariant = 'primary' | 'secondary';
 
 const BASE_CLASSES =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60';
+  'group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-[background-color,box-shadow,translate] disabled:cursor-not-allowed disabled:opacity-60';
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover disabled:hover:bg-primary',
+    'bg-linear-to-r from-brand-indigo via-brand-violet to-brand-fuchsia bg-size-[200%_100%] bg-left text-white shadow-[0_8px_24px_-8px_rgb(124_58_237/0.6)] hover:bg-right hover:shadow-[0_12px_28px_-8px_rgb(124_58_237/0.7)] active:translate-y-px disabled:hover:bg-left',
   secondary:
     'border border-border bg-card text-foreground shadow-xs hover:bg-muted disabled:hover:bg-card',
 };

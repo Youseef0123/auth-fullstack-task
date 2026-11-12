@@ -19,7 +19,8 @@ two days, each ending in a written report that I reviewed before the next one st
 
 Phases: 1 backend foundation · 2 users + auth · 3 hardening + e2e tests · 4 frontend ·
 5 frontend tests + rate-limit fix · 6 Docker / nginx / CI / README / GitHub · 7 independent review
-in a fresh session · 8 review fixes + this file.
+in a fresh session · 8 review fixes + this file · 9 creative redesign of the auth pages and the
+welcome page.
 
 ## 3. What was AI-assisted
 
@@ -31,6 +32,7 @@ in a fresh session · 8 review fixes + this file.
 | Tests (Jest, e2e, Vitest, MSW) | Wrote all of them, ran mutation checks | Asked for specific scenarios and for deliberately breaking code |
 | Docker, nginx, CI | Wrote them, rehearsed CI locally, fixed the failing CI run | Approved the edge-proxy model and Node 22 |
 | README / AI.md | Drafted both from the logs, reports and review | Reviewed them; my own reasons go where marked |
+| Visual design and welcome page | Researched Easygenerator and auth-page patterns, built the split-screen pages, the "Why me" section and the hack-this-app game, and wrote the image prompt | Asked for a more creative UI, generated the comic with Gemini from my photo, and asked for a game instead of a quiz |
 | Verification | Ran every checklist (browser flows, curl, coverage) | Designed the checklists and decided what counts as done |
 
 ## 4. Prompts and approaches that worked
@@ -109,10 +111,10 @@ in a fresh session · 8 review fixes + this file.
 
 ## 8. Time spent
 
-From the first commit (11 Nov, 12:03, `CLAUDE.md`) to the last commit (12 Nov, 09:43) is
-about 21.5 hours of wall-clock time, including a night. Commits fall into two windows: 12:03–21:38 on day 1
-(phases 1–6, with gaps between phases) and 08:39–09:43 on day 2 (the CI fix, the review fixes
-and this file). These are commit timestamps, not tracked working time.
+From the first commit (11 Nov, 12:03, `CLAUDE.md`) to the last commit (12 Nov, 17:19) is
+about 29.5 hours of wall-clock time, including a night. Commits fall into two windows: 12:03–21:38 on day 1
+(phases 1–6, with gaps between phases) and 08:39–17:19 on day 2 (the CI fix, the review
+fixes, this file and the UI redesign). These are commit timestamps, not tracked working time.
 
 ## 9. Two AI-specific files
 

@@ -69,6 +69,7 @@ welcome page · 10 light/dark theme toggle.
 | Emoji names (review) | `"x"*45+"🎉"*3` passed both validators but failed Mongoose `maxlength` (UTF-16 units): 500 | Schema length rules removed (the DTO is the single source); Mongoose validation errors map to 400 as a backstop; e2e and frontend tests for these names |
 | README paste failure (review) | The local-dev block `cd`'d into `backend`, started a blocking watcher, then tried `cd frontend` | Two terminal blocks, each starting at the repo root |
 | Theme on first load | The toggle followed system-theme changes only after hydration, so a change in between was missed (caught by the screenshot run: one "light" capture came out dark) | The toggle re-syncs with the system on mount; a unit test covers it, and the screenshot script waits for `data-theme` |
+| Back to sign-in after signing in (review) | The Back button replayed `/signin` from the client router cache, so the proxy never ran and a signed-in user saw the form again | A `GuestGuard` in the `(auth)` layout sends a signed-in user (per the store) to `/app`; unit tests cover both cases |
 | `lib` → feature dependency (review) | `lib/http.ts` imported the auth feature's messages to map errors to fields | `lib/http` returns raw messages; the auth feature owns the mapping; an ESLint rule blocks `src/lib` from importing features |
 
 ## 6. Decisions I made differently from AI suggestions

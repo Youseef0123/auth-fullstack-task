@@ -45,7 +45,9 @@ MongoDB are never published to the host. In Docker only nginx (8080) is.
 
 **Request flow.** `proxy.ts` makes an optimistic redirect from the cookie's presence only. The
 `(protected)` layout then confirms the session with `GET /api/users/me`. A cookie the API
-rejects is cleared via `POST /api/auth/logout` and the user lands on `/signin`.
+rejects is cleared via `POST /api/auth/logout` and the user lands on `/signin`. The browser's
+Back button can replay `/signin` or `/signup` from the client router cache without a server
+request, so the `(auth)` layout's `GuestGuard` also sends a signed-in user back to `/app`.
 
 ## Tech stack
 

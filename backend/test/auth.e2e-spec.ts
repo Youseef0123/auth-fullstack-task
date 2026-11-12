@@ -162,6 +162,29 @@ describe('Auth (e2e)', () => {
       },
     );
 
+    // Length is counted in characters (code points) on both sides, not UTF-16
+    // units: 48 and 26 characters are valid names even though they are 51 and
+    // 52 units long. These once returned 500 from a stricter Mongoose schema.
+    it.each([
+      ['45 letters + 3 emoji', `${'x'.repeat(45)}${'🎉'.repeat(3)}`],
+      ['26 emoji', '😀'.repeat(26)],
+    ])('accepts a name of %s (201)', async (_case, name) => {
+      const response = await signUp({ ...USER, name }).expect(201);
+
+      expect((response.body as UserResponseDto).name).toBe(name);
+      expect(await countUsers()).toBe(1);
+    });
+
+    it('rejects 51 emoji with the same 400 as any over-long name', async () => {
+      const response = await signUp({ ...USER, name: '😀'.repeat(51) }).expect(
+        400,
+      );
+
+      expect((response.body as ErrorResponseDto).message).toEqual([
+        NAME_MESSAGES.length,
+      ]);
+    });
+
     it('rejects unknown fields such as "role" with 400', async () => {
       const response = await signUp({ ...USER, role: 'admin' }).expect(400);
 

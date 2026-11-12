@@ -59,7 +59,7 @@ rejects is cleared via `POST /api/auth/logout` and the user lands on `/signin`.
 | Logging / docs | nestjs-pino 5 (pino 10), @nestjs/swagger 11.4 | JSON logs with redacted cookies; OpenAPI at `/api/docs` |
 | Frontend | Next.js 16.4 (App Router), React 19.3 | `proxy.ts` route protection, rewrites, standalone server |
 | Forms / state | react-hook-form 7.92 + Zod 4.6, Zustand 5.1, axios 1.21 | Same rules as the API; tiny store without persistence |
-| UI | Tailwind CSS 4.3, next/image | Light/dark tokens via `prefers-color-scheme`; CSS animations (off with reduced motion); no UI or animation library |
+| UI | Tailwind CSS 4.3, next/image | Light/dark tokens that follow the system until the sun/moon toggle picks one (kept in localStorage as a display preference, applied before first paint); CSS animations (off with reduced motion); no UI or animation library |
 | Tests | Jest 30 + supertest + mongodb-memory-server; Vitest 4.1 + Testing Library + MSW 2 | Real HTTP and in-memory MongoDB for the API; jsdom + mocked network for the UI |
 | Delivery | Docker (Node 22 alpine), nginx 1.30, GitHub Actions | Production-like stack in one command |
 

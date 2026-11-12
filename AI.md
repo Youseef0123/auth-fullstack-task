@@ -20,7 +20,7 @@ two days, each ending in a written report that I reviewed before the next one st
 Phases: 1 backend foundation · 2 users + auth · 3 hardening + e2e tests · 4 frontend ·
 5 frontend tests + rate-limit fix · 6 Docker / nginx / CI / README / GitHub · 7 independent review
 in a fresh session · 8 review fixes + this file · 9 creative redesign of the auth pages and the
-welcome page.
+welcome page · 10 light/dark theme toggle.
 
 ## 3. What was AI-assisted
 
@@ -68,6 +68,7 @@ welcome page.
 | MongoDB in CI | The first CI run failed: `mongo:8.0` (8.0.34) refuses to start on Linux 6.19+; local Docker (kernel 6.18) never showed it | Compose pins `mongo:8.2` (no guard in the binary); CI green |
 | Emoji names (review) | `"x"*45+"🎉"*3` passed both validators but failed Mongoose `maxlength` (UTF-16 units): 500 | Schema length rules removed (the DTO is the single source); Mongoose validation errors map to 400 as a backstop; e2e and frontend tests for these names |
 | README paste failure (review) | The local-dev block `cd`'d into `backend`, started a blocking watcher, then tried `cd frontend` | Two terminal blocks, each starting at the repo root |
+| Theme on first load | The toggle followed system-theme changes only after hydration, so a change in between was missed (caught by the screenshot run: one "light" capture came out dark) | The toggle re-syncs with the system on mount; a unit test covers it, and the screenshot script waits for `data-theme` |
 | `lib` → feature dependency (review) | `lib/http.ts` imported the auth feature's messages to map errors to fields | `lib/http` returns raw messages; the auth feature owns the mapping; an ESLint rule blocks `src/lib` from importing features |
 
 ## 6. Decisions I made differently from AI suggestions
@@ -111,10 +112,10 @@ welcome page.
 
 ## 8. Time spent
 
-From the first commit (11 Nov, 12:03, `CLAUDE.md`) to the last commit (12 Nov, 17:19) is
-about 29.5 hours of wall-clock time, including a night. Commits fall into two windows: 12:03–21:38 on day 1
-(phases 1–6, with gaps between phases) and 08:39–17:19 on day 2 (the CI fix, the review
-fixes, this file and the UI redesign). These are commit timestamps, not tracked working time.
+From the first commit (11 Nov, 12:03, `CLAUDE.md`) to the last commit (12 Nov, 19:19) is
+about 31.3 hours of wall-clock time, including a night. Commits fall into two windows: 12:03–21:38 on day 1
+(phases 1–6, with gaps between phases) and 08:39–19:19 on day 2 (the CI fix, the review
+fixes, this file, the UI redesign and the theme toggle). These are commit timestamps, not tracked working time.
 
 ## 9. Two AI-specific files
 

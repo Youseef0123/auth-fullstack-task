@@ -114,6 +114,21 @@ describe('Health & app wiring (e2e)', () => {
     expect((response.body as ErrorResponseDto).error).toBe('Bad Request');
   });
 
+  it('answers an oversized JSON body with 413, not 500', async () => {
+    const response = await http
+      .post('/api/auth/signup')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ name: 'x'.repeat(200 * 1024) }))
+      .expect(413);
+
+    expect(response.body).toMatchObject({
+      statusCode: 413,
+      message: 'request entity too large',
+      error: 'Payload Too Large',
+      path: '/api/auth/signup',
+    });
+  });
+
   it('serves Swagger UI at /api/docs', async () => {
     await http
       .get('/api/docs')

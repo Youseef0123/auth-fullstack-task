@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { Error as MongooseError } from 'mongoose';
 import { PinoLogger } from 'nestjs-pino';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 import { ErrorResponseDto } from './error-response.dto';
@@ -87,6 +88,57 @@ describe('AllExceptionsFilter', () => {
       statusCode: 429,
       message: 'Slow down',
       error: 'Too Many Requests',
+    });
+  });
+
+  it('maps a Mongoose ValidationError to 400 with its messages', () => {
+    const error = new MongooseError.ValidationError();
+    error.addError(
+      'name',
+      new MongooseError.ValidatorError({
+        path: 'name',
+        message: 'Path `name` is required.',
+      }),
+    );
+
+    const { body, status } = catchException(error);
+
+    expect(status).toBe(HttpStatus.BAD_REQUEST);
+    expect(body).toMatchObject({
+      statusCode: 400,
+      message: ['Path `name` is required.'],
+      error: 'Bad Request',
+    });
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it('keeps the 4xx status of an exposed middleware error (body-parser 413)', () => {
+    const error = Object.assign(new Error('request entity too large'), {
+      status: 413,
+      statusCode: 413,
+      expose: true,
+      type: 'entity.too.large',
+    });
+
+    const { body, status } = catchException(error);
+
+    expect(status).toBe(HttpStatus.PAYLOAD_TOO_LARGE);
+    expect(body).toMatchObject({
+      statusCode: 413,
+      message: 'request entity too large',
+      error: 'Payload Too Large',
+    });
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it('does not trust a status on errors that are not marked as exposable', () => {
+    const error = Object.assign(new Error('internal detail'), { status: 404 });
+
+    const { body } = catchException(error);
+
+    expect(body).toMatchObject({
+      statusCode: 500,
+      message: 'Internal server error',
     });
   });
 

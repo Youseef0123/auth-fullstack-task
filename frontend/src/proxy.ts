@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { ROUTES } from '@/lib/routes';
+import { ACCESS_TOKEN_COOKIE } from '@/lib/session-cookie';
 
-const ACCESS_TOKEN_COOKIE = 'access_token';
 const GUEST_ONLY_PATHS: readonly string[] = [ROUTES.signIn, ROUTES.signUp];
 
 /**

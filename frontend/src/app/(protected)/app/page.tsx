@@ -4,6 +4,7 @@ import { HackGame } from '@/app/(protected)/app/_components/hack-game';
 import { HireMeComic } from '@/app/(protected)/app/_components/hire-me-comic';
 import { Card } from '@/components/ui/card';
 import { Logo } from '@/components/ui/logo';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { CurrentUser } from '@/features/auth/components/current-user';
 import { LogoutButton } from '@/features/auth/components/logout-button';
 import { AUTHOR_NAME, COMPANY_NAME } from '@/lib/site';
@@ -16,10 +17,13 @@ export default function AppPage() {
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Logo />
-          <span className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground sm:inline-flex">
-            <span className="size-2 rounded-full bg-success" />
-            Built for the {COMPANY_NAME} team
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground sm:inline-flex">
+              <span className="size-2 rounded-full bg-success" />
+              Built for the {COMPANY_NAME} team
+            </span>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

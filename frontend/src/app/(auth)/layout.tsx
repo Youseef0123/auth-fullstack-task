@@ -2,19 +2,26 @@ import type { ReactNode } from 'react';
 import { AuthShowcase } from '@/app/(auth)/_components/auth-showcase';
 import { AuthSwitch } from '@/app/(auth)/_components/auth-switch';
 import { Logo } from '@/components/ui/logo';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
       <AuthShowcase />
 
-      <div className="flex min-h-dvh flex-col">
+      <div className="relative flex min-h-dvh flex-col">
+        <div className="absolute right-6 top-6 hidden lg:block">
+          <ThemeToggle />
+        </div>
         <header className="relative isolate overflow-hidden bg-[#0f0b2e] px-5 pb-7 pt-6 text-white lg:hidden">
           <div aria-hidden="true" className="absolute inset-0 -z-10">
             <div className="absolute -left-16 -top-20 size-56 rounded-full bg-brand-indigo/60 blur-3xl" />
             <div className="absolute -bottom-24 right-0 size-60 rounded-full bg-brand-fuchsia/40 blur-3xl" />
           </div>
-          <Logo />
+          <div className="flex items-center justify-between gap-4">
+            <Logo />
+            <ThemeToggle tone="onDark" />
+          </div>
           <p className="mt-4 text-lg font-semibold leading-snug">
             Everyone has knowledge{' '}
             <span className="bg-linear-to-r from-amber-300 to-pink-300 bg-clip-text text-transparent">

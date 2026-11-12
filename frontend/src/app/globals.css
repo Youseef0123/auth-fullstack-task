@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* The theme is the data-theme attribute on <html>, set before paint by THEME_INIT_SCRIPT
+   (stored toggle choice, else the system preference); dark: utilities follow it too. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 :root {
   color-scheme: light;
   --background: #f6f7f9;
@@ -21,27 +25,25 @@
   --success: #15803d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --background: #0c0c10;
-    --foreground: #f4f4f6;
-    --muted: #1c1c23;
-    --muted-foreground: #a1a1ad;
-    --card: #15151b;
-    --border: #2a2a33;
-    --input: #3a3a45;
-    --primary: #5b52f0;
-    --primary-hover: #6d65f3;
-    --primary-foreground: #ffffff;
-    --primary-soft: #1e1b4b;
-    --accent: #a5b4fc;
-    --ring: #818cf8;
-    --danger: #f87171;
-    --danger-soft: #2a1215;
-    --danger-border: #5c1d22;
-    --success: #4ade80;
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --background: #0c0c10;
+  --foreground: #f4f4f6;
+  --muted: #1c1c23;
+  --muted-foreground: #a1a1ad;
+  --card: #15151b;
+  --border: #2a2a33;
+  --input: #3a3a45;
+  --primary: #5b52f0;
+  --primary-hover: #6d65f3;
+  --primary-foreground: #ffffff;
+  --primary-soft: #1e1b4b;
+  --accent: #a5b4fc;
+  --ring: #818cf8;
+  --danger: #f87171;
+  --danger-soft: #2a1215;
+  --danger-border: #5c1d22;
+  --success: #4ade80;
 }
 
 @theme inline {

@@ -15,8 +15,12 @@ readable by JavaScript. Everything runs behind one origin with `docker compose u
 |---|---|---|
 | Sign in | ![Sign in, light](frontend/docs/screenshots/signin-light.png) | ![Sign in, dark](frontend/docs/screenshots/signin-dark.png) |
 | Sign up (validation) | ![Sign up with errors, light](frontend/docs/screenshots/signup-errors-light.png) | ![Sign up with errors, dark](frontend/docs/screenshots/signup-errors-dark.png) |
-| App | ![App, light](frontend/docs/screenshots/app-light.png) | ![App, dark](frontend/docs/screenshots/app-dark.png) |
+| App (comic + mini-course) | ![App, light](frontend/docs/screenshots/app-light.png) | ![App, dark](frontend/docs/screenshots/app-dark.png) |
+| Mini-course certificate | ![Certificate, light](frontend/docs/screenshots/certificate-light.png) | ![Certificate, dark](frontend/docs/screenshots/certificate-dark.png) |
 
+The sign-in and sign-up pages pair the form with an animated brand panel. After sign-in, the page made
+for the Easygenerator team shows a four-panel SVG comic about knowledge sharing that greets the user by
+name, and "Secure sign-in 101": a quiz about how this app protects the session, ending in a certificate.
 360px mobile versions are in [`frontend/docs/screenshots`](frontend/docs/screenshots).
 
 **Contents:** [Architecture](#architecture) · [Tech stack](#tech-stack) · [Repository structure](#repository-structure) · [Quick start](#quick-start-docker) · [Local development](#local-development-without-docker) · [Environment variables](#environment-variables) · [API](#api) · [Testing](#testing) · [CI](#ci) · [Security decisions](#security-decisions) · [Known limitations](#known-limitations--trade-offs) · [Troubleshooting](#troubleshooting) · [AI usage](#ai-usage)
@@ -52,7 +56,7 @@ rejects is cleared via `POST /api/auth/logout` and the user lands on `/signin`.
 | Logging / docs | nestjs-pino 5 (pino 10), @nestjs/swagger 11.4 | JSON logs with redacted cookies; OpenAPI at `/api/docs` |
 | Frontend | Next.js 16.4 (App Router), React 19.3 | `proxy.ts` route protection, rewrites, standalone server |
 | Forms / state | react-hook-form 7.92 + Zod 4.6, Zustand 5.1, axios 1.21 | Same rules as the API; tiny store without persistence |
-| UI | Tailwind CSS 4.3 | Light/dark tokens via `prefers-color-scheme`, no UI library |
+| UI | Tailwind CSS 4.3, inline SVG | Light/dark tokens via `prefers-color-scheme`; hand-drawn SVG comic and CSS animations (off with reduced motion); no UI or animation library |
 | Tests | Jest 30 + supertest + mongodb-memory-server; Vitest 4.1 + Testing Library + MSW 2 | Real HTTP and in-memory MongoDB for the API; jsdom + mocked network for the UI |
 | Delivery | Docker (Node 22 alpine), nginx 1.30, GitHub Actions | Production-like stack in one command |
 
@@ -69,7 +73,8 @@ Node: Docker and CI use **Node 22 LTS** (`.nvmrc`); `engines` is `>=20.19.0`, so
 │  ├─ test/                 e2e specs + utils (in-memory MongoDB, test app factory)
 │  └─ Dockerfile
 ├─ frontend/                Next.js app
-│  ├─ src/app/              (auth)/signin, (auth)/signup, (protected)/app, not-found, error
+│  ├─ src/app/              (auth)/signin, (auth)/signup, (protected)/app, not-found, error;
+│  │                        route-only components in _components/ (showcase, comic, course)
 │  ├─ src/components/ui/    Button, Input, Label, FormField, Card, Alert, Spinner, Logo
 │  ├─ src/features/auth/    components, schemas, services, store, types
 │  ├─ src/lib/              http client, ApiError, form error helper, routes (no feature imports)
@@ -173,10 +178,10 @@ The user is always `{ id, email, name, createdAt }`. Every error has the same sh
 |---|---|---|
 | Backend unit | `cd backend && npm test` (`npm run test:cov`) | Services, the exception filter, DTO validation, config parsing (env, durations, `TRUST_PROXY`), cookie options |
 | Backend e2e | `npm run test:e2e` (`npm run test:e2e:cov`) | The real app bootstrap against in-memory MongoDB: full session flow, validation messages (including emoji names), duplicate emails, identical 401s, cookie attributes (incl. `Secure` in production), a JWT that carries only `sub`, tampered/expired/foreign/`alg=none` JWTs, deleted users, 429 + `Retry-After`, `TRUST_PROXY` behaviour (including a rotating `X-Forwarded-For`), 413 for oversized bodies, health/Swagger, and that no response ever contains a password or hash |
-| Frontend | `cd frontend && npm test` (`npm run test:cov`, `test:watch`) | Zod schemas, HTTP error normalization, message-to-field mapping, store, forms (MSW), `proxy.ts`, protected layout |
+| Frontend | `cd frontend && npm test` (`npm run test:cov`, `test:watch`) | Zod schemas, HTTP error normalization, message-to-field mapping, store, forms (MSW), strength meter, `proxy.ts`, protected layout, the auth switch and showcase, the comic and the mini-course |
 
 Coverage at the time of writing: backend e2e **96% statements** (unit 50%, since controllers and wiring are
-exercised end to end); frontend **88% statements / 91% branches**. The backend's first `npm ci` also
+exercised end to end); frontend **92% statements / 93% branches**. The backend's first `npm ci` also
 downloads a MongoDB binary for the in-memory e2e database (several hundred MB), so it can take a while.
 
 **Drift guard.** The validation **constants are shared and drift-guarded; the logic is mirrored and tested

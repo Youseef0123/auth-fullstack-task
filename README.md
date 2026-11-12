@@ -4,6 +4,13 @@ A production-ready sign-up / sign-in module: a **NestJS 11** API with MongoDB an
 **Next.js 16** frontend. Sessions are a JWT in an `httpOnly` cookie, so no token is ever
 readable by JavaScript. Everything runs behind one origin with `docker compose up`.
 
+> **For reviewers**
+> - **Run:** `echo "JWT_SECRET=$(openssl rand -hex 48)" > .env && docker compose up --build -d --wait` (bash; PowerShell [below](#quick-start-docker))
+> - **Open:** http://localhost:8080 (API docs: http://localhost:8080/api/docs)
+> - **Test** (from the repo root): `(cd backend && npm ci && npm test && npm run test:e2e)` and `(cd frontend && npm ci && npm test)`
+> - **Auth logic:** [`auth.service.ts`](backend/src/modules/auth/auth.service.ts), [`jwt.strategy.ts`](backend/src/modules/auth/jwt.strategy.ts), [`auth-cookie.service.ts`](backend/src/modules/auth/auth-cookie.service.ts), [`proxy.ts`](frontend/src/proxy.ts), [`auth.store.ts`](frontend/src/features/auth/store/auth.store.ts), [`(protected)/layout.tsx`](<frontend/src/app/(protected)/layout.tsx>)
+> - **How AI was used:** [AI.md](AI.md)
+
 | | Light | Dark |
 |---|---|---|
 | Sign in | ![Sign in, light](frontend/docs/screenshots/signin-light.png) | ![Sign in, dark](frontend/docs/screenshots/signin-dark.png) |
@@ -65,7 +72,7 @@ Node: Docker and CI use **Node 22 LTS** (`.nvmrc`); `engines` is `>=20.19.0`, so
 │  ├─ src/app/              (auth)/signin, (auth)/signup, (protected)/app, not-found, error
 │  ├─ src/components/ui/    Button, Input, Label, FormField, Card, Alert, Spinner, Logo
 │  ├─ src/features/auth/    components, schemas, services, store, types
-│  ├─ src/lib/              http client, ApiError, form error mapping, routes
+│  ├─ src/lib/              http client, ApiError, form error helper, routes (no feature imports)
 │  ├─ src/proxy.ts          optimistic route protection
 │  ├─ docs/screenshots/
 │  └─ Dockerfile
@@ -83,20 +90,33 @@ docker compose up --build -d --wait               # first build takes a few minu
 # open http://localhost:8080  (API docs: http://localhost:8080/api/docs)
 ```
 
-`docker compose down` stops the stack; add `-v` to also delete the MongoDB volume.
+In **Windows PowerShell 5.1**, `>` writes UTF-16, which compose cannot read. Use Git Bash, or:
+
+```powershell
+"JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")" | Set-Content -Encoding ascii .env
+docker compose up --build -d --wait
+```
+
+`docker compose down` stops the stack; add `-v` to also delete the MongoDB volume. Use exactly
+`http://localhost:8080`: the cookie is `Secure` in this stack ([why](#troubleshooting)).
 
 ## Local development (without Docker)
 
-Requirements: Node 22 (or ≥ 20.19) and MongoDB listening on `127.0.0.1:27017`.
+Requirements: Node 22 (or ≥ 20.19) and MongoDB listening on `127.0.0.1:27017`. Use two terminals,
+each starting at the repository root.
+
+**Terminal 1: API** on http://localhost:4000/api (docs: `/api/docs`)
 
 ```bash
-# API: http://localhost:4000/api (docs: /api/docs)
 cd backend
-cp .env.example .env        # set JWT_SECRET (generator command is in the file)
+cp .env.example .env        # then set JWT_SECRET (the generator command is in the file)
 npm ci
 npm run start:dev
+```
 
-# Web: http://localhost:3000 (proxies /api to BACKEND_URL)
+**Terminal 2: web** on http://localhost:3000 (proxies `/api` to `BACKEND_URL`)
+
+```bash
 cd frontend
 cp .env.example .env.local
 npm ci
@@ -116,8 +136,8 @@ npm run dev
 | `JWT_EXPIRES_IN` | no | `1d` | Token lifetime (`15m`, `1h`, `1d`…); also the cookie `Max-Age` |
 | `CORS_ORIGIN` | yes | — | Origin allowed to make credentialed requests |
 | `THROTTLE_TTL_MS` | no | `60000` | Rate-limit window |
-| `THROTTLE_LIMIT` | no | `5` | Sign-in / sign-up attempts per window per client IP |
-| `TRUST_PROXY` | no | `false` | Which proxies may set `X-Forwarded-For`: `false`, `loopback`, a hop count, or IPs/CIDRs ([details](#security-decisions)) |
+| `THROTTLE_LIMIT` | no | `5` | Sign-in / sign-up attempts per window per client IP (`.env.example` uses 20 for local dev) |
+| `TRUST_PROXY` | no | `false` | Which proxies may set `X-Forwarded-For`: `false`, `loopback`, a hop count, or IPs/CIDRs ([details](#rate-limiting-and-trust_proxy)) |
 
 **Frontend** (`frontend/.env.local`)
 
@@ -151,17 +171,18 @@ The user is always `{ id, email, name, createdAt }`. Every error has the same sh
 
 | | Command | What it covers |
 |---|---|---|
-| Backend unit | `cd backend && npm test` (`npm run test:cov`) | Services, guards, decorators, config parsing, cookie options |
-| Backend e2e | `npm run test:e2e` | The real app bootstrap against in-memory MongoDB: full session flow, validation messages, duplicate emails, identical 401s, cookie attributes (incl. `Secure` in production), tampered/expired/foreign/`alg=none` JWTs, deleted users, 429 + `Retry-After`, `TRUST_PROXY` behaviour (including a rotating `X-Forwarded-For`), health/Swagger, and that no response ever contains a password or hash |
-| Frontend | `cd frontend && npm test` (`npm run test:cov`, `test:watch`) | Zod schemas, HTTP error normalization, store, forms (MSW), `proxy.ts`, protected layout |
+| Backend unit | `cd backend && npm test` (`npm run test:cov`) | Services, the exception filter, DTO validation, config parsing (env, durations, `TRUST_PROXY`), cookie options |
+| Backend e2e | `npm run test:e2e` (`npm run test:e2e:cov`) | The real app bootstrap against in-memory MongoDB: full session flow, validation messages (including emoji names), duplicate emails, identical 401s, cookie attributes (incl. `Secure` in production), a JWT that carries only `sub`, tampered/expired/foreign/`alg=none` JWTs, deleted users, 429 + `Retry-After`, `TRUST_PROXY` behaviour (including a rotating `X-Forwarded-For`), 413 for oversized bodies, health/Swagger, and that no response ever contains a password or hash |
+| Frontend | `cd frontend && npm test` (`npm run test:cov`, `test:watch`) | Zod schemas, HTTP error normalization, message-to-field mapping, store, forms (MSW), `proxy.ts`, protected layout |
 
-Coverage at the time of writing: backend e2e **97% statements** (unit 49%, since controllers and wiring are
+Coverage at the time of writing: backend e2e **96% statements** (unit 50%, since controllers and wiring are
 exercised end to end); frontend **88% statements / 91% branches**.
 
-**Drift guard.** The validation rules exist twice (class-validator DTOs and Zod schemas) but come from one
-source: `backend/src/common/constants/validation.constants.ts`. The frontend keeps an identical copy, and
-`validation.constants.test.ts` imports the backend file by relative path and deep-compares every export
-(regexes by source and flags). Changing a rule or message on one side fails the frontend tests.
+**Drift guard.** The validation **constants are shared and drift-guarded; the logic is mirrored and tested
+on both sides**. Rules and messages live in `backend/src/common/constants/validation.constants.ts`; the
+frontend keeps an identical copy, and `validation.constants.test.ts` imports the backend file by relative
+path and deep-compares every export (regexes by source and flags). The checks themselves exist twice
+(class-validator DTOs and Zod schemas) and each side has its own tests, including the same edge cases.
 
 ## CI
 
@@ -178,19 +199,14 @@ source: `backend/src/common/constants/validation.constants.ts`. The frontend kee
   allow-list DTO, so the hash cannot be serialized. Inputs are whitelisted (`forbidNonWhitelisted`), so
   extra fields such as `role` are rejected.
 - **Session cookie**: `access_token`, `HttpOnly`, `SameSite=Lax`, `Path=/`, `Max-Age` = JWT lifetime, and
-  `Secure` when `NODE_ENV=production`. Browsers treat `http://localhost` as secure, so the Docker stack works
-  without TLS locally. JWTs are pinned to HS256, and the user must still exist.
+  `Secure` when `NODE_ENV=production`. JWTs are pinned to HS256, carry only the user id (`sub`), and the
+  user must still exist.
 - **No tokens in client state**: the Zustand store holds only `{ id, email, name }` and a status. Nothing is
   persisted, and nothing touches `localStorage`.
 - **Generic auth errors**: sign-in always answers `401 Invalid email or password`. Unknown emails are verified
   against a dummy argon2 hash, so the response time does not reveal whether an account exists.
 - **Rate limiting**: 5 sign-in and 5 sign-up attempts per minute per client IP, with 429 + `Retry-After`.
-  The Next.js rewrite adds no `X-Forwarded-For` and forwards a client-sent one unchanged, so:
-  - local development uses `TRUST_PROXY=false` (also the default): the header is ignored and everyone
-    shares one bucket, which is strict but cannot be bypassed;
-  - in Docker, nginx **overwrites** `X-Forwarded-For` with the client address and the API trusts exactly
-    one hop (`TRUST_PROXY=1`, the Next.js server). A spoofed header never changes the bucket; this is
-    tested in e2e and verified through the stack.
+  A client cannot change its bucket by sending `X-Forwarded-For` ([details](#rate-limiting-and-trust_proxy)).
 - **Headers**: helmet on the API; `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy` and
   `Permissions-Policy` on pages; `X-Powered-By` and nginx versions hidden.
 - **Configuration**: all settings come from the environment and are validated at startup (Joi for the API,
@@ -199,15 +215,41 @@ source: `backend/src/common/constants/validation.constants.ts`. The frontend kee
 - **Containers**: multi-stage images with production dependencies only; nginx, Next.js, the API and
   MongoDB all run as non-root users; only port 8080 is published, and each service pair has its own network.
 
+### Rate limiting and TRUST_PROXY
+
+<details>
+<summary>Why local dev uses <code>TRUST_PROXY=false</code> and Docker uses <code>1</code></summary>
+
+The Next.js `/api` rewrite adds no `X-Forwarded-For` and forwards a client-sent one unchanged.
+
+- **Local development** uses `TRUST_PROXY=false` (also the default when unset): the header is ignored and
+  every browser shares the Next.js server's address, i.e. one bucket. That is strict, but it cannot be
+  bypassed; `backend/.env.example` raises the limit to 20 for this reason.
+- **Docker**: nginx **overwrites** `X-Forwarded-For` with the client address (never appends), and the API
+  trusts exactly one hop (`TRUST_PROXY=1`, the Next.js server). A spoofed header never changes the bucket.
+  This is tested in e2e (including a rotating header) and was verified through the running stack.
+- **Other deployments**: put a reverse proxy in front that overwrites the header, keep Next.js and the API
+  reachable only through it, and trust only the hops between that proxy and the API.
+
+</details>
+
 ## Known limitations / trade-offs
 
-- **Sign-up reveals registered emails** (`409 Email already registered`), which the specification requires.
-  Sign-in does not leak this.
+- **Sign-up reveals registered emails** (`409 Email already registered`): a deliberate UX trade-off, so
+  users learn they already have an account. Sign-in does not leak this.
+- **Logout does not revoke the JWT**: it clears the cookie, but a copied token stays valid until it expires
+  (`JWT_EXPIRES_IN`, 1 day by default). Revocation would need a denylist or short tokens with refresh.
 - **The throttler stores counters in memory**: limits apply per API instance and reset on restart. Several
   instances would need a shared store (e.g. Redis).
 - **Local development shares one rate-limit bucket** (`TRUST_PROXY=false` behind the Next.js rewrite).
-- **The frontend email check is slightly stricter than the backend's**: Zod rejects rare RFC-valid characters
-  such as `!` in the local part, which validator.js accepts. The API remains the authority.
+- **The frontend email check differs slightly from the backend's, in both directions**: Zod rejects rare
+  RFC-valid characters such as `!` in the local part, and accepts a 65-character local part or a
+  64-character domain label that validator.js rejects. The API remains the authority, and its 400 is shown
+  on the email field.
+- **Swagger is served in the Docker stack** (`/api/docs`): useful for this demo; a real production
+  deployment would disable it or put it behind authentication.
+- **Pages have no Content-Security-Policy** (the API sends helmet's). A real production deployment would add
+  a nonce-based CSP for the Next.js pages.
 - **Out of scope**: refresh tokens, email verification and roles. There is no CSRF token, because
   `SameSite=Lax` plus a same-origin API covers this deployment; a cross-site deployment would need one.
 - **MongoDB runs without authentication** on the private compose network (never published). Enable auth
@@ -215,6 +257,9 @@ source: `backend/src/common/constants/validation.constants.ts`. The frontend kee
 
 ## Troubleshooting
 
+- **Signed in, but sent straight back to `/signin` (Docker).** Open the stack as exactly
+  `http://localhost:8080`. The cookie is `Secure` (`NODE_ENV=production`), which browsers accept over plain
+  HTTP only on `localhost`; any other host (a LAN IP, a VM, a domain) needs TLS.
 - **Vitest: "failed to find the current suite" on Windows Git Bash.** Git Bash reports the drive letter in
   lowercase (`d:\…`) and Vitest then loads itself twice. Run the tests from PowerShell or cmd, or `cd /D/...`
   with an uppercase drive in Git Bash.

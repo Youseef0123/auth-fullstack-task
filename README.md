@@ -223,6 +223,9 @@ source: `backend/src/common/constants/validation.constants.ts`. The frontend kee
 - **`npm run start` warns about `output: standalone`.** The local production server still works; the Docker
   image runs `node server.js` from the standalone output instead.
 - **Port 8080 already in use.** Stop the other service or change the published port in `docker-compose.yml`.
+- **MongoDB exits with "Linux kernel versions 6.19 and newer has a known incompatibility".** `mongo:8.0`
+  (8.0.34) and `mongo:9.0` refuse to start on kernel 6.19+ ([SERVER-121912](https://jira.mongodb.org/browse/SERVER-121912)).
+  Compose pins `mongo:8.2`, which starts there (verified on GitHub's runners).
 
 ## AI usage
 

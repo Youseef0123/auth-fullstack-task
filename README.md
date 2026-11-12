@@ -176,7 +176,8 @@ The user is always `{ id, email, name, createdAt }`. Every error has the same sh
 | Frontend | `cd frontend && npm test` (`npm run test:cov`, `test:watch`) | Zod schemas, HTTP error normalization, message-to-field mapping, store, forms (MSW), `proxy.ts`, protected layout |
 
 Coverage at the time of writing: backend e2e **96% statements** (unit 50%, since controllers and wiring are
-exercised end to end); frontend **88% statements / 91% branches**.
+exercised end to end); frontend **88% statements / 91% branches**. The backend's first `npm ci` also
+downloads a MongoDB binary for the in-memory e2e database (several hundred MB), so it can take a while.
 
 **Drift guard.** The validation **constants are shared and drift-guarded; the logic is mirrored and tested
 on both sides**. Rules and messages live in `backend/src/common/constants/validation.constants.ts`; the

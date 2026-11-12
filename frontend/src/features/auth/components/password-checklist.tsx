@@ -1,31 +1,26 @@
-import { PASSWORD_RULES } from '@/features/auth/schemas/validation.constants';
+import {
+  PASSWORD_CHECKS,
+  type PasswordCheck,
+} from '@/features/auth/schemas/password-rules';
 import { cn } from '@/lib/cn';
 
 interface ChecklistItem {
   label: string;
-  passes: (password: string) => boolean;
+  checks: PasswordCheck[];
 }
 
-const CHECKLIST: readonly ChecklistItem[] = [
-  {
-    label: `${PASSWORD_RULES.minLength}–${PASSWORD_RULES.maxLength} characters`,
-    passes: (p) =>
-      p.length >= PASSWORD_RULES.minLength &&
-      p.length <= PASSWORD_RULES.maxLength,
-  },
-  {
-    label: 'One letter',
-    passes: (p) => PASSWORD_RULES.letterPattern.test(p),
-  },
-  {
-    label: 'One number',
-    passes: (p) => PASSWORD_RULES.numberPattern.test(p),
-  },
-  {
-    label: 'One special character',
-    passes: (p) => PASSWORD_RULES.specialCharacterPattern.test(p),
-  },
-];
+/** One line per requirement, in rule order; a line is met when all its checks pass. */
+const CHECKLIST: readonly ChecklistItem[] = PASSWORD_CHECKS.reduce<
+  ChecklistItem[]
+>((items, check) => {
+  const item = items.find(({ label }) => label === check.requirement);
+  if (item) {
+    item.checks.push(check);
+  } else {
+    items.push({ label: check.requirement, checks: [check] });
+  }
+  return items;
+}, []);
 
 interface PasswordChecklistProps {
   password: string;
@@ -35,8 +30,8 @@ interface PasswordChecklistProps {
 export function PasswordChecklist({ password }: PasswordChecklistProps) {
   return (
     <ul aria-label="Password requirements" className="grid gap-1 pt-1 text-sm">
-      {CHECKLIST.map(({ label, passes }) => {
-        const met = passes(password);
+      {CHECKLIST.map(({ label, checks }) => {
+        const met = checks.every((check) => check.passes(password));
         return (
           <li
             key={label}

@@ -13,7 +13,7 @@ auth-fullstack-task/
              tests: Vitest, Testing Library (react, dom, user-event, jest-dom), MSW, jsdom
   nginx/     edge proxy config (nginx.conf) for docker-compose
   .github/workflows/ci.yml, docker-compose.yml, .env.example (compose secrets),
-  README.md, AI.md, .gitattributes, .nvmrc
+  README.md, AI.md, CLAUDE.md, .gitattributes, .editorconfig, .nvmrc
 
 Runtime: Node 22 LTS for Docker images and CI (.nvmrc = 22). package.json engines
 stay ">=20.19.0" so local development on Node 20 still works.
@@ -25,8 +25,10 @@ Backend tests: unit specs next to the code (*.spec.ts); e2e in backend/test/
 Frontend layout: src/app (route groups (auth) and (protected)), src/components/ui,
 src/features/auth/{components,schemas,services,store,types}, src/lib.
 Frontend tests: *.test.ts(x) next to the code they test; vitest.config.mts and
-vitest.setup.ts at frontend/ root.
-Each app has its own Dockerfile and .dockerignore.
+vitest.setup.ts at frontend/ root. src/lib must not import from src/features or
+src/app (enforced by ESLint).
+Each app has its own Dockerfile, .dockerignore and .env.example (backend/.env,
+frontend/.env.local are git-ignored). README screenshots: frontend/docs/screenshots/.
 
 ## Naming
 - Files: kebab-case (sign-up-form.tsx, auth.service.ts). React components: PascalCase exports.

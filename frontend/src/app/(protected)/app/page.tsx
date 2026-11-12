@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { FitSection } from '@/app/(protected)/app/_components/fit-section';
 import { SecurityCourse } from '@/app/(protected)/app/_components/security-course';
 import { WelcomeComic } from '@/app/(protected)/app/_components/welcome-comic';
 import { Card } from '@/components/ui/card';
@@ -69,6 +70,8 @@ export default function AppPage() {
         </section>
 
         <WelcomeComic />
+
+        <FitSection />
 
         <SecurityCourse />
 

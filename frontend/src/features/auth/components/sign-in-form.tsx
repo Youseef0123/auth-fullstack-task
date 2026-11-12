@@ -7,6 +7,11 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
+import {
+  ARROW_RIGHT_ICON,
+  LOCK_ICON,
+  MAIL_ICON,
+} from '@/components/ui/input-icons';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { authFieldForMessage } from '@/features/auth/schemas/field-messages';
 import {
@@ -56,6 +61,7 @@ export function SignInForm() {
             {...register('email')}
             type="email"
             autoComplete="email"
+            startIcon={MAIL_ICON}
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
@@ -73,6 +79,7 @@ export function SignInForm() {
             {...control}
             {...register('password')}
             autoComplete="current-password"
+            startIcon={LOCK_ICON}
           />
         )}
       </FormField>
@@ -83,6 +90,7 @@ export function SignInForm() {
         className="mt-1 w-full"
       >
         Sign in
+        {ARROW_RIGHT_ICON}
       </Button>
     </form>
   );

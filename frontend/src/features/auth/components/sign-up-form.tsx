@@ -7,6 +7,12 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
+import {
+  ARROW_RIGHT_ICON,
+  LOCK_ICON,
+  MAIL_ICON,
+  USER_ICON,
+} from '@/components/ui/input-icons';
 import { PasswordChecklist } from '@/features/auth/components/password-checklist';
 import { PasswordInput } from '@/features/auth/components/password-input';
 import { authFieldForMessage } from '@/features/auth/schemas/field-messages';
@@ -59,6 +65,7 @@ export function SignUpForm() {
             {...control}
             {...register('name')}
             autoComplete="name"
+            startIcon={USER_ICON}
             placeholder="Jane Doe"
           />
         )}
@@ -70,6 +77,7 @@ export function SignUpForm() {
             {...register('email')}
             type="email"
             autoComplete="email"
+            startIcon={MAIL_ICON}
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
@@ -88,6 +96,7 @@ export function SignUpForm() {
             {...control}
             {...register('password')}
             autoComplete="new-password"
+            startIcon={LOCK_ICON}
           />
         )}
       </FormField>
@@ -98,6 +107,7 @@ export function SignUpForm() {
         className="mt-1 w-full"
       >
         Create account
+        {ARROW_RIGHT_ICON}
       </Button>
     </form>
   );

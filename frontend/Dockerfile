@@ -25,6 +25,8 @@ ENV NODE_ENV=production \
 # The standalone server may write its cache under .next, so it owns the app files.
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
+# The standalone output does not include public/ (e.g. the welcome comic).
+COPY --from=build --chown=node:node /app/public ./public
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=5 \

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { FitSection } from '@/app/(protected)/app/_components/fit-section';
-import { SecurityCourse } from '@/app/(protected)/app/_components/security-course';
-import { WelcomeComic } from '@/app/(protected)/app/_components/welcome-comic';
+import { HackGame } from '@/app/(protected)/app/_components/hack-game';
+import { HireMeComic } from '@/app/(protected)/app/_components/hire-me-comic';
 import { Card } from '@/components/ui/card';
 import { Logo } from '@/components/ui/logo';
 import { CurrentUser } from '@/features/auth/components/current-user';
@@ -52,9 +52,9 @@ export default function AppPage() {
                 Welcome to the application.
               </h1>
               <p className="mt-4 max-w-xl text-white/70">
-                This page was made for the {COMPANY_NAME} team: a short comic
-                about knowledge sharing, then a two-minute course on how your
-                session is protected, with a certificate at the end.
+                This page was made for the {COMPANY_NAME} team: a comic about
+                the course I built about myself, why I fit, and a mini-game
+                where you try to hack this app. You will lose, politely.
               </p>
             </div>
             <Card className="text-foreground">
@@ -69,11 +69,11 @@ export default function AppPage() {
           </div>
         </section>
 
-        <WelcomeComic />
+        <HireMeComic />
 
         <FitSection />
 
-        <SecurityCourse />
+        <HackGame />
 
         <footer className="pb-4 text-center text-sm text-muted-foreground">
           Crafted with care by {AUTHOR_NAME} for {COMPANY_NAME} · NestJS ·
